@@ -5,13 +5,14 @@ import com.gustavonascimento.usersreader.entities.User;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDTO {
     private Long id;
     private String name;
     private String email;
-    private List<RoleDTO> roles;
+    private List<RoleDTO> roles = new ArrayList<>();
     private boolean isActive;
     private OffsetDateTime createdAt;
 
@@ -23,8 +24,7 @@ public class UserDTO {
         this.name = entity.getName();
         this.email = entity.getEmail();
         for (Role r : entity.getRoles()) {
-            RoleDTO dto = new RoleDTO(r.getAuthority());
-            roles.add(dto);
+            roles.add(new RoleDTO(r.getAuthority()));
         }
         this.isActive = entity.isActive();
         this.createdAt = entity.getCreatedAt()

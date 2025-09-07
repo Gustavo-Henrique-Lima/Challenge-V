@@ -1,4 +1,4 @@
-package com.gustavonascimento.usersreader;
+package com.gustavonascimento.usersreader.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +19,14 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    @Value("${app.pagination.maxPageSize:50}")
-    private int maxPageSize;
-
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Transactional
-    public Page<UserDTO> search(String q, String role, boolean isActive, Pageable pageable){
-        LOG.info("Buscando usuários com os parametros: {}, {], {}", q, role, isActive);
+    public Page<UserDTO> search(String q, String role, Boolean isActive, Pageable pageable){
+        LOG.info("Buscando usuários com os parametros: q={}, role={}, isActive={}", q, role, isActive);
         Page<User> entities = userRepository.search(q, role, isActive, pageable);
-        return entities.map(user -> new UserDTO(user));
+        return entities.map(UserDTO::new);
     }
 }
