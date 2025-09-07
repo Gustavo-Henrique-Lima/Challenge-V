@@ -14,6 +14,7 @@ import com.gustavonascimento.usersreader.entities.User;
 import com.gustavonascimento.usersreader.repositories.RoleRepository;
 import com.gustavonascimento.usersreader.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;
@@ -41,6 +42,7 @@ public class UsersreaderApplication {
 	}
 
 	@Bean
+	@Profile("!test")
 	CommandLineRunner seedUsers(ObjectMapper mapper,
 								UserRepository users,
 								RoleRepository roles) {

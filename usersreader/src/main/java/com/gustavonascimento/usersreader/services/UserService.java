@@ -63,7 +63,7 @@ public class UserService {
         UploadReportDTO report = new UploadReportDTO();
 
         if (file == null || file.isEmpty()) {
-            report.errors.add("File is empty");
+            report.errors.add("Arquivo não enviado");
             return report;
         }
 
@@ -71,7 +71,7 @@ public class UserService {
             List<UserUploadDTO> payload = mapper.readValue(is, new TypeReference<List<UserUploadDTO>>() {});
 
             if (payload == null || payload.isEmpty()) {
-                LOG.info("Upload payload is empty.");
+                LOG.info("Arquivo de upload está vazio.");
                 return report;
             }
 
@@ -79,19 +79,19 @@ public class UserService {
                 try {
                     if (r == null || r.email == null || r.email.isBlank()) {
                         report.skipped++;
-                        report.errors.add("Invalid record: missing email");
+                        report.errors.add("Erro ao gravar usuário: e-mail vazio");
                         continue;
                     }
 
                     Optional<User> existing = userRepository.findByEmailIgnoreCase(r.email.trim());
                     if (existing.isPresent()) {
                         report.skipped++;
-                        LOG.info("User already exists, skipped: {}", r.email);
+                        LOG.info("Ignorando: {}, usuário já existe", r.email);
                         continue;
                     }
 
                     Role role = roleRepository.findByAuthority(r.role)
-                            .orElseThrow(() -> new IllegalStateException("Role not found: " + r.role));
+                            .orElseThrow(() -> new ResourceNotFoundException("Role não encontrada: " + r.role));
 
                     User u = new User();
                     u.setName(r.name);
@@ -108,22 +108,22 @@ public class UserService {
 
                     userRepository.save(u);
                     report.inserted++;
-                    LOG.info("User inserted via upload: {}", u.getEmail());
+                    LOG.info("Usuário salvo via upload: {}", u.getEmail());
 
                 } catch (Exception e) {
                     report.skipped++;
                     String email = (r != null ? r.email : "null");
-                    String msg = "Error processing " + email + ": " + e.getMessage();
+                    String msg = "Erro ao processar" + email + ": " + e.getMessage();
                     report.errors.add(msg);
                     LOG.error(msg, e);
                 }
             }
 
-            LOG.info("Upload finished. Inserted: {}, Skipped: {}", report.inserted, report.skipped);
+            LOG.info("Upload concluído. Inseridos: {}, Ignorados: {}", report.inserted, report.skipped);
             return report;
 
         } catch (Exception e) {
-            String msg = "Failed to process file: " + e.getMessage();
+            String msg = "Falha ao processo o arquivo: " + e.getMessage();
             report.errors.add(msg);
             LOG.error(msg, e);
             return report;

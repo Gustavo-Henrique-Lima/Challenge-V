@@ -7,6 +7,7 @@ import java.util.List;
 
 @Schema(name = "UserPage", description = "Paginated response for users")
 public class UserPage {
+
     public List<UserDTO> content;
     public int number;
     public int size;
