@@ -1,6 +1,8 @@
 package com.gustavonascimento.usersreader.controllers;
 
 import com.gustavonascimento.usersreader.controllers.exceptions.StandardError;
+import com.gustavonascimento.usersreader.entities.dto.UploadReportDTO;
+import com.gustavonascimento.usersreader.entities.dto.UserUploadDTO;
 import com.gustavonascimento.usersreader.services.UserService;
 import com.gustavonascimento.usersreader.entities.dto.UserDTO;
 
@@ -15,6 +17,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -100,5 +105,42 @@ public class UserController {
     public ResponseEntity<UserDTO> findById(@PathVariable Long id){
         UserDTO entity = service.findById(id);
         return  ResponseEntity.ok(entity);
+    }
+
+    @Operation(
+            summary = "Upload users from JSON file",
+            description = "Receives a JSON file (array of users) and inserts them into the database. If an email already exists, it is skipped.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Ok",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UploadReportDTO.class),
+                                    examples = @ExampleObject(value =
+                                            "{\n" +
+                                                    "  \"inserted\": 3,\n" +
+                                                    "  \"skipped\": 1,\n" +
+                                                    "  \"errors\": [\"Role not found: unknown\"]\n" +
+                                                    "}"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Internal server error",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(value = "{ \"message\": \"Internal server error\" }")
+                            )
+                    )
+            }
+    )
+    @PostMapping(value = "/upload-file", consumes = "multipart/form-data", produces = "application/json")
+    public ResponseEntity<UploadReportDTO> uploadUsersFile(
+            @RequestPart("file") MultipartFile file) {
+
+        UploadReportDTO report = service.uploadUsersFromFile(file);
+        return ResponseEntity.ok(report);
     }
 }
