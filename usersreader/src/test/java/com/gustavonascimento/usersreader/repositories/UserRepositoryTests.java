@@ -86,8 +86,8 @@ class UserRepositoryTests {
         Page<User> active = repository.search(null, null, true, PageRequest.of(0, 10));
         Page<User> inactive = repository.search(null, null, false, PageRequest.of(0, 10));
 
-        Assertions.assertEquals(3, active.getTotalElements());  // Alice, Carol, Alex
-        Assertions.assertEquals(1, inactive.getTotalElements()); // Bob
+        Assertions.assertEquals(3, active.getTotalElements()); 
+        Assertions.assertEquals(1, inactive.getTotalElements());
     }
 
     @Test
