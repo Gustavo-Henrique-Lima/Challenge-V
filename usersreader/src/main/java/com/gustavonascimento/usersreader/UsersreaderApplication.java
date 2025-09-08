@@ -15,6 +15,7 @@ import com.gustavonascimento.usersreader.repositories.RoleRepository;
 import com.gustavonascimento.usersreader.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class UsersreaderApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UsersreaderApplication.class);
+	private static final List<String> DEFAULT_ROLES = List.of("admin","manager","analyst","viewer");
 
 	public static void main(String[] args) {
 		SpringApplication.run(UsersreaderApplication.class, args);
@@ -43,6 +45,22 @@ public class UsersreaderApplication {
 
 	@Bean
 	@Profile("!test")
+	@Order(1)
+	CommandLineRunner seedRoles(RoleRepository roles) {
+		return args -> {
+		for (String r : DEFAULT_ROLES) {
+			roles.findByAuthority(r).orElseGet(() -> {
+			Role role = new Role();
+			role.setAuthority(r);
+			return roles.save(role);
+			});
+		}
+		};
+	}
+
+	@Bean
+	@Profile("!test")
+	@Order(2)
 	CommandLineRunner seedUsers(ObjectMapper mapper,
 								UserRepository users,
 								RoleRepository roles) {

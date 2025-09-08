@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: ${APP_NAME}-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $DB_NAME -U $DB_USERNAME"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .    
+    container_name: ${APP_NAME}-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_PROFILE: ${SPRING_PROFILES_ACTIVE}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      DB_SERVER: ${DB_SERVER}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${APP_PORT}:8080"
+
+volumes:
+  db_data:
